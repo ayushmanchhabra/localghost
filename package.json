@@ -26,6 +26,7 @@
         "@vitejs/plugin-react": "^4.3.1",
         "base-volta-off-of-nwjs": "^1.0.5",
         "concurrently": "^8.2.2",
+        "gh-pages": "^6.1.1",
         "jsdom": "^24.1.1",
         "nw": "^0.90.0",
         "nw-builder": "^4.8.1",
