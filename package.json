@@ -1,0 +1,33 @@
+{
+    "name": "stonks",
+    "version": "0.0.0",
+    "main": "http://localhost:5173",
+    "node-remote": "http://localhost:5173",
+    "private": true,
+    "scripts": {
+        "postinstall": "base-volta-off-of-nwjs",
+        "dev": "concurrently -k npm:dev:vite npm:dev:nwjs",
+        "dev:vite": "vite",
+        "dev:nwjs": "wait-on -c wait-on.config.json http-get://localhost:5173 && nw .",
+        "bld": "exit 1 && npm run bld:vite && npm run bld:nwjs",
+        "bld:vite": "vite build --out-dir ./out/vite",
+        "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./package.nw.json ./package.json ./out/vite/*"
+    },
+    "devDependencies": {
+        "@types/chrome": "^0.0.269",
+        "@types/node": "^22.2.0",
+        "@types/nw.js": "^0.90.0",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "base-volta-off-of-nwjs": "^1.0.5",
+        "concurrently": "^8.2.2",
+        "nw": "^0.90.0",
+        "nw-builder": "^4.8.1",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "typescript": "^5.5.4",
+        "vite": "^5.4.0",
+        "wait-on": "^7.2.0"
+    }
+}
