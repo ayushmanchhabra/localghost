@@ -12,7 +12,8 @@
         "bld": "exit 1 && npm run bld:vite && npm run bld:nwjs",
         "bld:vite": "vite build --out-dir ./out/vite",
         "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
-        "e2e:vite": "vitest run"
+        "e2e:vite": "vitest run",
+        "pkg:vite": "gh-pages -b staging -d ./out/vite -u \"github-actions-bot <support+actions@github.com>\""
     },
     "devDependencies": {
         "@testing-library/jest-dom": "^6.4.8",

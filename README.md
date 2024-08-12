@@ -11,7 +11,10 @@
     - [ ] Code coverage
     - [ ] Vitest
 - [ ] Add CD release flow
+    - [ ] Web
     - [ ] Linux
     - [ ] Windows
     - [ ] MacOS
+    - [ ] AOS
+    - [ ] IOS
 - [ ] Auto updater
