@@ -2,11 +2,14 @@
 
 ## Roadmap
 
-- [ ] Get app working in development mode
+- [ ] Get app working in docker development mode
+    - [ ] Web
+    - [ ] Desktop
+    - [ ] Mobile
 - [ ] Add CI testing flow
     - [ ] License check
     - [ ] Code coverage
-    - [ ] Vitest + Webdriverio + Selenium?
+    - [ ] Vitest
 - [ ] Add CD release flow
     - [ ] Linux
     - [ ] Windows

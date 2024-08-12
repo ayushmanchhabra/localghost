@@ -8,12 +8,15 @@
         "postinstall": "base-volta-off-of-nwjs",
         "dev": "concurrently -k npm:dev:vite npm:dev:nwjs",
         "dev:vite": "vite",
-        "dev:nwjs": "wait-on -c wait-on.config.json http-get://localhost:5173 && nw .",
+        "dev:nwjs": "wait-on -c ./build/nw/wait-on.config.json http-get://localhost:5173 && nw .",
         "bld": "exit 1 && npm run bld:vite && npm run bld:nwjs",
         "bld:vite": "vite build --out-dir ./out/vite",
-        "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./package.nw.json ./package.json ./out/vite/*"
+        "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
+        "e2e:vite": "vitest run"
     },
     "devDependencies": {
+        "@testing-library/jest-dom": "^6.4.8",
+        "@testing-library/react": "^16.0.0",
         "@types/chrome": "^0.0.269",
         "@types/node": "^22.2.0",
         "@types/nw.js": "^0.90.0",
@@ -22,12 +25,14 @@
         "@vitejs/plugin-react": "^4.3.1",
         "base-volta-off-of-nwjs": "^1.0.5",
         "concurrently": "^8.2.2",
+        "jsdom": "^24.1.1",
         "nw": "^0.90.0",
         "nw-builder": "^4.8.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "typescript": "^5.5.4",
         "vite": "^5.4.0",
+        "vitest": "^2.0.5",
         "wait-on": "^7.2.0"
     }
 }

@@ -1,5 +1,5 @@
 export default function App () {
     return (
-        <>hi</>
+        <div data-testid='test'>Hello, World!</div>
     );
 } 
