@@ -1,20 +1,23 @@
 # Stonks
 
+## Getting Started
+
+1. Install Docker and Docker Compose
+1. `docker compose up` (`--build` if building first time)
+
 ## Roadmap
 
+### Chores
+
 - [ ] Get app working in docker development mode
-    - [ ] Web
+    - [x] Web
     - [ ] Desktop
     - [ ] Mobile
 - [ ] Add CI testing flow
-    - [ ] License check
-    - [ ] Code coverage
-    - [ ] Vitest
+    - [x] Web
+    - [ ] Desktop
+    - [ ] Mobile
 - [ ] Add CD release flow
-    - [ ] Web
-    - [ ] Linux
-    - [ ] Windows
-    - [ ] MacOS
-    - [ ] AOS
-    - [ ] IOS
-- [ ] Auto updater
+    - [x] Web
+    - [ ] Desktop
+    - [ ] Mobile
