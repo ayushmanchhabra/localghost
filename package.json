@@ -4,6 +4,7 @@
     "main": "http://localhost:5173",
     "node-remote": "http://localhost:5173",
     "private": true,
+    "type": "module",
     "scripts": {
         "postinstall": "base-volta-off-of-nwjs",
         "dev": "concurrently -k npm:dev:vite npm:dev:nwjs",
@@ -13,9 +14,12 @@
         "bld:vite": "vite build --out-dir ./out/vite",
         "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
         "e2e:vite": "vitest run",
+        "e2e:nightwatch": "nightwatch ./app/App.spec.tsx --debug --devtools",
         "pkg:vite": "gh-pages -b staging -d ./out/vite -u \"github-actions-bot <support+actions@github.com>\""
     },
     "devDependencies": {
+        "@nightwatch/apitesting": "^3.1.4",
+        "@nightwatch/testing-library": "^0.1.1",
         "@testing-library/jest-dom": "^6.4.8",
         "@testing-library/react": "^16.0.0",
         "@types/chrome": "^0.0.270",
@@ -28,12 +32,14 @@
         "concurrently": "^8.2.2",
         "gh-pages": "^6.1.1",
         "jsdom": "^24.1.1",
+        "nightwatch": "^3.7.0",
         "nw": "^0.90.0",
         "nw-builder": "^4.8.1",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "typescript": "^5.5.4",
         "vite": "^5.4.0",
+        "vite-plugin-nightwatch": "^0.4.6",
         "vitest": "^2.0.5",
         "wait-on": "^7.2.0"
     },
