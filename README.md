@@ -3,7 +3,10 @@
 ## Getting Started
 
 1. Install Docker and Docker Compose
-1. `docker compose up` (`--build` if building first time)
+1. `docker compose up -d vite` to run the web app
+1. `docker compose up -d nwjs` to run the desktop app
+
+> Add `--build` if building for the first time
 
 ## Roadmap
 
