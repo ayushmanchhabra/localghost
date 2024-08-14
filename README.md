@@ -14,7 +14,7 @@
 
 - [ ] Add Docker staging flow
     - [x] Web
-    - [ ] Desktop
+    - [x] Desktop
     - [ ] Mobile
 - [ ] Add CI testing flow
     - [x] Web
