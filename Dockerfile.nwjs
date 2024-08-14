@@ -1,6 +1,6 @@
 FROM ubuntu:rolling@sha256:2e863c44b718727c860746568e1d54afd13b2fa71b160f5cd9058fc436217b30
-WORKDIR /app/nwjs
-COPY ./node_modules/nw/nwjs-sdk-v0.90.0-linux-x64 .
+WORKDIR /app/stonks
+# Install required packages
 RUN apt update
 RUN apt install -y libglib2.0-0
 RUN apt install -y libnss3
@@ -20,4 +20,15 @@ RUN apt install -y libcairo2
 RUN apt install -y libasound2t64
 RUN apt install -y xvfb
 RUN apt install -y libatomic1
-CMD ["./nw"]
+RUN apt install -y curl
+# Install Volta package manager
+RUN curl https://get.volta.sh | bash
+ENV VOLTA_HOME="/root/.volta"
+ENV PATH="$VOLTA_HOME/bin:$PATH"
+RUN volta install node@22
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+COPY . .
+EXPOSE 5173
+CMD ["npm", "run", "dev"]
