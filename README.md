@@ -9,7 +9,7 @@
 
 ### Chores
 
-- [ ] Get app working in docker development mode
+- [ ] Add Docker staging flow
     - [x] Web
     - [ ] Desktop
     - [ ] Mobile
