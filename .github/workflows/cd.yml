@@ -16,9 +16,6 @@ jobs:
         uses: actions/checkout@v4.1.7
       - name: Setup Node.js
         uses: volta-cli/action@v4.2.1
-        with:
-          volta-version: '1.1.1'
-          node-version: 22
       - name: Install dependencies
         run: npm ci
       - name: Run web build
