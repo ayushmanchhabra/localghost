@@ -14,15 +14,17 @@
         "bld:vite": "vite build --out-dir ./out/vite",
         "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
         "e2e:vite": "vitest run",
-        "e2e:nightwatch": "nightwatch ./app/App.spec.tsx --debug --devtools",
+        "e2e:nightwatch": "nightwatch --headless",
         "pkg:vite": "gh-pages -b staging -d ./out/vite -u \"github-actions-bot <support+actions@github.com>\""
     },
     "devDependencies": {
         "@nightwatch/apitesting": "^3.1.4",
+        "@nightwatch/react": "ayushmanchhabra/nightwatch-plugin-react#vite",
         "@nightwatch/testing-library": "^0.1.1",
         "@testing-library/jest-dom": "^6.4.8",
         "@testing-library/react": "^16.0.0",
         "@types/chrome": "^0.0.270",
+        "@types/nightwatch": "^2.3.31",
         "@types/node": "^22.2.0",
         "@types/nw.js": "^0.90.0",
         "@types/react": "^18.3.3",

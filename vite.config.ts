@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   base: '',
-  plugins: [react(), nightwatch],
+  plugins: [react(), nightwatch()],
   test: {
     setupFiles: ['./app/setup.ts'],
     environment: "jsdom",
