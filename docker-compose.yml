@@ -13,3 +13,9 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix
     environment:
       - DISPLAY=$DISPLAY
+  ns:
+    build:
+      context: .
+      dockerfile: Dockerfile.ns
+    ports:
+      - "3000:3000"
