@@ -1,5 +1,7 @@
+import { Box } from '@mui/material';
+
 export default function App () {
     return (
-        <div data-testid='test'>Hello, World!</div>
+        <Box data-testid='test'>Hello, World!</Box>
     );
-} 
+}

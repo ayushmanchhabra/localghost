@@ -16,6 +16,11 @@
         "pkg:vite": "gh-pages -b staging -d ./out/vite -u \"github-actions-bot <support+actions@github.com>\""
     },
     "devDependencies": {
+        "@emotion/react": "^11.13.0",
+        "@emotion/styled": "^11.13.0",
+        "@fontsource/roboto": "^5.0.14",
+        "@mui/icons-material": "^5.16.7",
+        "@mui/material": "^5.16.7",
         "@testing-library/jest-dom": "^6.4.8",
         "@testing-library/react": "^16.0.0",
         "@types/chrome": "^0.0.270",
