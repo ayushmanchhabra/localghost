@@ -11,7 +11,7 @@ ENV ANDROID_HOME=/usr/lib/android-sdk
 ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/cmdline-tools/bin
 RUN unzip ./cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
 RUN yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
-RUN sdkmanager --sdk_root=$ANDROID_HOME --install "build-tools;34.0.0" "emulator" "platforms;android-34" "build-tools;34.0.0"
+RUN sdkmanager --sdk_root=$ANDROID_HOME --install "build-tools;34.0.0" "emulator" "platform-tools" "platforms;android-34" "system-images;android-34;google_apis;x86_64"
 # Install Volta package manager
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
