@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile.vite
     ports:
       - "5173:5173"
-  nwjs:
+  nw:
     build:
       context: .
       dockerfile: Dockerfile.nwjs

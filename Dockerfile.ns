@@ -1,21 +1,22 @@
 FROM ubuntu:rolling@sha256:2e863c44b718727c860746568e1d54afd13b2fa71b160f5cd9058fc436217b30
-WORKDIR /app/stonks
+WORKDIR /app
 # Install required packages
 RUN apt update
+RUN apt install -y wget unzip curl gnupg
 RUN apt install -y openjdk-21-jdk
 RUN apt install -y android-sdk
-RUN apt install -y wget
-RUN apt install -y unzip
-RUN apt install -y curl
-RUN wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdline-tools.zip
-RUN unzip ./cmdline-tools.zip -d /usr/lib/android-sdk/cmdline-tools
+# Install Android SDK
+RUN wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O ./cmdline-tools.zip
 ENV ANDROID_HOME=/usr/lib/android-sdk
-ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/bin
+ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/cmdline-tools/bin
+RUN unzip ./cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+RUN sdkmanager --sdk_root=$ANDROID_HOME --install "build-tools;34.0.0" "emulator" "platforms;android-34" "build-tools;34.0.0"
 # Install Volta package manager
 RUN curl https://get.volta.sh | bash
 ENV VOLTA_HOME="/root/.volta"
-ENV PATH="$VOLTA_HOME/bin:$PATH"
+ENV PATH=$PATH:$VOLTA_HOME/bin
 RUN volta install node@22
+RUN node -v
+RUN npm -v
 RUN npm i -g nativescript
-RUN /usr/lib/android-sdk/cmdline-tools/bin/sdkmanager --install "platforms;android-35" --sdk_root=$ANDROID_HOME
 RUN ns doctor android
