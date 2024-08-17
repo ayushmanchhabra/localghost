@@ -10,6 +10,7 @@ RUN wget https://dl.google.com/android/repository/commandlinetools-linux-1107670
 ENV ANDROID_HOME=/usr/lib/android-sdk
 ENV PATH=$PATH:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/cmdline-tools/bin
 RUN unzip ./cmdline-tools.zip -d $ANDROID_HOME/cmdline-tools
+RUN yes | sdkmanager --sdk_root=$ANDROID_HOME --licenses
 RUN sdkmanager --sdk_root=$ANDROID_HOME --install "build-tools;34.0.0" "emulator" "platforms;android-34" "build-tools;34.0.0"
 # Install Volta package manager
 RUN curl https://get.volta.sh | bash
@@ -19,4 +20,4 @@ RUN volta install node@22
 RUN node -v
 RUN npm -v
 RUN npm i -g nativescript
-RUN ns doctor android
+CMD ns doctor android
