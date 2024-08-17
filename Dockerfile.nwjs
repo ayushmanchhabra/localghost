@@ -1,4 +1,4 @@
-FROM ubuntu:rolling@sha256:4a471b7df57f65d6aa7349409717152621a9efae3448d81de2619fc2d9b5b940
+FROM ubuntu:rolling@sha256:8a37d68f4f73ebf3d4efafbcf66379bf3728902a8038616808f04e34a9ab63ee
 WORKDIR /app/stonks
 # Install required packages
 RUN apt update
