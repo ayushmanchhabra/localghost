@@ -9,6 +9,7 @@
         "dev": "concurrently -k npm:dev:vite npm:dev:nwjs",
         "dev:vite": "vite",
         "dev:nwjs": "wait-on -c ./build/nw/wait-on.config.json http-get://localhost:5173 && nw .",
+        "dev:ns": "ns run android",
         "bld": "exit 1 && npm run bld:vite && npm run bld:nwjs",
         "bld:vite": "vite build --out-dir ./out/vite",
         "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
