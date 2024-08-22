@@ -1,4 +1,4 @@
-FROM node:22-slim@sha256:221ee67425de7a3c11ce4e81e63e50caaec82ede3a7d34599ab20e59d29a0cb5
+FROM node:22-slim@sha256:a7bb230eaab526f6e792008edae92c62c8a2001437b880e9f03eeeb8bf3e9573
 WORKDIR /app/stonks
 COPY package*.json ./
 RUN npm install
