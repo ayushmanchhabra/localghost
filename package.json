@@ -1,5 +1,5 @@
 {
-    "name": "stonks",
+    "name": "localghost",
     "version": "0.0.0",
     "main": "http://localhost:5173",
     "node-remote": "http://localhost:5173",
