@@ -1,5 +1,5 @@
 FROM ubuntu:rolling@sha256:eea047b4b181f2d3aeafbc0ce5294a2bbb3b98153a68b9ed4bc573d871ca9450
-WORKDIR /app/stonks
+WORKDIR /app/localghost
 # Install required packages
 RUN apt update
 RUN apt install -y libglib2.0-0

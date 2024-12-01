@@ -1,4 +1,4 @@
-# Stonks
+# Localghost
 
 ## Getting Started
 
