@@ -20,3 +20,8 @@ jobs:
         run: npm ci
       - name: Run web tests
         run: npm run e2e:vite
+      - name: Run tests
+        run: npm run test:cov
+      - name: Report Coverage
+        if: always()
+        uses:  davelosert/vitest-coverage-report-action@v2.8.0

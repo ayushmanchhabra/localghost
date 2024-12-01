@@ -13,6 +13,7 @@
         "bld:vite": "vite build --out-dir ./out/vite",
         "bld:nwjs": "nwbuild --cacheDir=./node_modules/nw --outDir=./out/nw --managedManifest=./build/nw/manifest.json ./package.json ./out/vite/*",
         "e2e:vite": "vitest run",
+        "e2e:vite:cov": "vitest run --coverage.enabled true",
         "pkg:vite": "gh-pages -b staging -d ./out/vite -u \"github-actions-bot <support+actions@github.com>\""
     },
     "devDependencies": {
@@ -29,6 +30,7 @@
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
         "@vitejs/plugin-react": "^4.3.1",
+        "@vitest/coverage-v8": "^2.1.6",
         "base-volta-off-of-nwjs": "^1.0.5",
         "concurrently": "^9.0.0",
         "gh-pages": "^6.1.1",
