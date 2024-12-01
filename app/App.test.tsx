@@ -8,7 +8,7 @@ describe("App", () => {
     let unMount: () => void = () => { };
 
     beforeEach(() => {
-        let { unmount } = render(<App />);
+        const { unmount } = render(<App />);
 
         unMount = unmount;
     });

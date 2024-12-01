@@ -1,4 +1,4 @@
-# Stonks
+# Localghost
 
 ## Getting Started
 
@@ -15,12 +15,9 @@
 - [ ] Add Docker staging flow
     - [x] Web
     - [ ] Desktop
-    - [ ] Mobile
 - [ ] Add CI testing flow
     - [x] Web
     - [ ] Desktop
-    - [ ] Mobile
 - [ ] Add CD release flow
     - [x] Web
     - [ ] Desktop
-    - [ ] Mobile

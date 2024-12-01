@@ -5,8 +5,13 @@ export default defineConfig({
   base: '',
   plugins: [react()],
   test: {
-    setupFiles: ['./app/setup.ts'],
-    environment: "jsdom",
+    coverage: {
+      provider: 'v8',
+      reporter: ['json', 'json-summary'],
+      reportOnFailure: true,
+    },
+    environment: 'jsdom',
+    setupFiles: ['./app/setup.ts']
   },
   server: {
     host: true,

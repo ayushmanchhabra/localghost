@@ -18,5 +18,12 @@ jobs:
         uses: volta-cli/action@v4.2.1
       - name: Install dependencies
         run: npm ci
+      - name: Lint web code
+        run: npm run lnt
       - name: Run web tests
         run: npm run e2e:vite
+      - name: Run tests
+        run: npm run e2e:vite:cov
+      - name: Report Coverage
+        if: always()
+        uses:  davelosert/vitest-coverage-report-action@v2.8.0
