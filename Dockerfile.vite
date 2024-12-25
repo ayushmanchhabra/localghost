@@ -1,4 +1,4 @@
-FROM node:22-slim@sha256:a4b757cd491c7f0b57f57951f35f4e85b7e1ad54dbffca4cf9af0725e1650cd8
+FROM node:22-slim@sha256:f6914c8412c2a7bba8aa751e9a2882614e7fa76b3367cde2a051a45991704377
 WORKDIR /app/locslghost
 COPY package*.json ./
 RUN npm install
