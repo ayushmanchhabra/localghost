@@ -27,7 +27,7 @@
         "@mui/material": "^6.0.0",
         "@testing-library/jest-dom": "^6.4.8",
         "@testing-library/react": "^16.0.0",
-        "@types/chrome": "^0.0.300",
+        "@types/chrome": "^0.0.301",
         "@types/node": "^22.2.0",
         "@types/nw.js": "^0.92.0",
         "@types/react": "^19.0.0",
