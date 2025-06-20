@@ -1,0 +1,23 @@
+{
+  "name": "localghost",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "test": "node --experimental-test-coverage --test ./tests/specs/crawler.test.js",
+    "start": "node cli.js https://asyncawake.studio",
+    "crawl": "node crawler.js"
+  },
+  "dependencies": {
+    "commander": "^14.0.0",
+    "selenium-webdriver": "^4.33.0"
+  },
+  "volta": {
+    "node": "24.1.0",
+    "npm": "11.4.1"
+  },
+  "devDependencies": {
+    "express": "^5.1.0"
+  }
+}
