@@ -5,7 +5,7 @@ Security automation and instrumentation.
 ## Environment
 
 1. [Volta](https://volta.sh) (recommended)
-1. Node.js (the version as mentioned in the `package.json`'s `volta.node` property)
+1. [Node.js](https://nodejs.org/) (the version as mentioned in the `package.json`'s `volta.node` property)
 
 ## Usage
 

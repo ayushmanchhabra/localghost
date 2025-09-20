@@ -1,4 +1,4 @@
-import Adb from "./src/aos/adb.js";
+import Adb from "../../../src/aos/adb.js";
 
 // Memu has its own adb.exe, hence the file path needs to be explicity passed.
 const adb = new Adb("C:\\Program Files\\Microvirt\\MEmu\\adb.exe");

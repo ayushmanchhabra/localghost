@@ -2,16 +2,21 @@ import child_process from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+/**
+ * Class representing ADB (Android Debug Bridge) operations.
+ */
 export default class Adb {
+
+    #filePath;
+    #args = [];
+    #options = { encoding: "utf-8" };
+
+    /**
+     * Initiailise adb class
+     * @param {string} filePath - Path to adb executable
+     */
     constructor(filePath) {
-        this.filePath = filePath;
-        this.args = [];
-        this.options = { encoding: "utf-8" };
-    }
-
-    // TODO: implement connect, pair, start, kill server methods
-    connect () {
-
+        this.#filePath = filePath;
     }
 
     /**
@@ -19,8 +24,8 @@ export default class Adb {
      * @returns {Array<{name: string, device: string}>} - Array of connected devices
      */
     getConnectedDevices() {
-        this.args = ["devices"]
-        const result = child_process.execFileSync(this.filePath, this.args, this.options);
+        this.#args = ["devices"]
+        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
         const devicesInfo = result.trim().split(/\r?\n/).slice(1);
 
         const devices = [];
@@ -37,10 +42,10 @@ export default class Adb {
      * @returns {"arm64-v8a" | "armeabi-v7a" | "x86" | x86_64} - Device architecture
      */
     getDeviceArch(serial) {
-        this.args = serial
+        this.#args = serial
             ? ["-s", serial, "shell", "getprop", "ro.product.cpu.abi"]
             : ["shell", "getprop", "ro.product.cpu.abi"];
-        const result = child_process.execFileSync(this.filePath, this.args, this.options);
+        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
         return result;
     }
 
@@ -50,10 +55,10 @@ export default class Adb {
      * @returns {Array<string>} - Array of all package names
      */
     getPackages(serial) {
-        this.args = serial
+        this.#args = serial
             ? ["-s", serial, "shell", "pm", "list", "packages"]
             : ["shell", "pm", "list", "packages"];
-        const result = child_process.execFileSync(this.filePath, this.args, this.options);
+        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
         const packages = result
             .split("\n")
             .filter(line => line.trim() !== "")
@@ -68,10 +73,10 @@ export default class Adb {
      * @returns {Array<string>} - Array of installation paths
      */
     getPaths(serial, packageName) {
-        this.args = serial
+        this.#args = serial
             ? ["-s", serial, "shell", "pm", "path", packageName]
             : ["shell", "pm", "path", packageName];
-        const result = child_process.execFileSync(this.filePath, this.args, this.options);
+        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
         const paths = result
             .split("\n")
             .filter(line => line.trim() !== "")
@@ -97,10 +102,10 @@ export default class Adb {
         }
 
         for (const path of paths) {
-            this.args = serial
+            this.#args = serial
                 ? ["-s", serial, "pull", path, resolvedOutDir]
                 : ["pull", path, resolvedOutDir];
-            child_process.execFileSync(this.filePath, this.args, this.options);
+            child_process.execFileSync(this.#filePath, this.#args, this.#options);
         }
     }
 }
