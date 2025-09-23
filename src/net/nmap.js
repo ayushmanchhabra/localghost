@@ -1,6 +1,6 @@
 import child_process from "node:child_process";
 
-import xml2js from "xml2js";
+import { parseStringPromise } from "xml2js";
 
 /**
  * Class representing nmap functionality
@@ -19,25 +19,24 @@ export default class Nmap {
         this.#filePath = filePath;
     }
 
-    set(args) {
-        this.#args = args;
-    }
-
-    exe() {
-        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
-        return result;
-    }
-
     /**
      * Ping scan
      * @param {"ARP"} type - Type of ping scan.
-     * @returns {string} - Result of ping scan.
+     * @returns {Array<{state: string, ip: string}>} - Array of host objects with state and ip address.
      */
-    ping(type, target) {
+    async ping(type, target) {
         if (type === "ARP") {
             this.#args = ["-sn", "-PR", "-oX", "-", target];
-            const result = child_process.execFileSync("nmap", this.#args, this.#options);
-            return result;
+            const xmlData = child_process.execFileSync("nmap", this.#args, this.#options);
+            const result = await parseStringPromise(xmlData);
+            const hosts = result.nmaprun.host || [];
+            const hostArray = hosts.map(host => {
+                const state = host.status[0].$.state;
+                const addr = host.address[0].$.addr;
+                return { state, addr };
+            });
+
+            return hostArray;
         }
     }
 }
