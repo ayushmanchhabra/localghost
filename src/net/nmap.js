@@ -22,13 +22,13 @@ export default class Nmap {
     /**
      * Ping scan
      * @param {"ARP"} type - Type of ping scan.
-     * @returns {Array<{state: string, ip: string}>} - Array of host objects with state and ip address.
+     * @returns {Promise<Array<{state: string, ip: string}>>} - Array of host objects with state and ip address.
      */
     async ping(type, target) {
         if (type === "ARP") {
             this.#args = ["-sn", "-PR", "-oX", "-", target];
-            const xmlData = child_process.execFileSync("nmap", this.#args, this.#options);
-            const result = await parseStringPromise(xmlData);
+            const xmlData = child_process.spawnSync("nmap", this.#args, this.#options);
+            const result = await parseStringPromise(xmlData.stdout);
             const hosts = result.nmaprun.host || [];
             const hostArray = hosts.map(host => {
                 const state = host.status[0].$.state;
