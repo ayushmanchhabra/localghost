@@ -9,7 +9,7 @@ export default class Adb {
 
     #filePath;
     #args = [];
-    #options = { encoding: "utf-8" };
+    #options = { encoding: "utf-8", stdio: "pipe" };
 
     /**
      * Initiailise adb class
@@ -20,13 +20,38 @@ export default class Adb {
     }
 
     /**
+     * Start adb server
+     * @returns {child_process.SpawnSyncReturns<Buffer<ArrayBufferLike>>}
+     */
+    startServer() {
+        console.log('[ INFO ] Starting ADB server...');
+        this.#args = ["start-server"];
+        /* Timeout after 5 seconds to prevent spawnSync from blocking Node.js' event loop. */
+        this.#options = { ...this.#options, timeout: 5000 };
+        const result = child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        return result;
+    }
+
+    /**
+     * Kill adb server
+     * @returns {child_process.SpawnSyncReturns<Buffer<ArrayBufferLike>>}
+     */
+    killServer() {
+        console.log('[ INFO ] Killing ADB server...');
+        this.#args = ["kill-server"];
+        const result = child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        return result;
+    }
+
+    /**
      * Get connected devices
      * @returns {Array<{name: string, device: string}>} - Array of connected devices
      */
     getConnectedDevices() {
+        console.log('[ INFO ] Finding connected devices...');
         this.#args = ["devices"]
-        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
-        const devicesInfo = result.trim().split(/\r?\n/).slice(1);
+        const result = child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        const devicesInfo = result.stdout.trim().split(/\r?\n/).slice(1);
 
         const devices = [];
         for (const device of devicesInfo) {
@@ -46,7 +71,7 @@ export default class Adb {
             ? ["-s", serial, "shell", "getprop", "ro.product.cpu.abi"]
             : ["shell", "getprop", "ro.product.cpu.abi"];
         const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
-        return result;
+        return result.trim();
     }
 
     /**
@@ -70,14 +95,18 @@ export default class Adb {
      * Get the installation paths of a package.
      * @param {string} serial - Serial number of Android device
      * @param {string} packageName - Name of the package
-     * @returns {Array<string>} - Array of installation paths
+     * @returns {Array<string> | undefined} - Array of installation paths
      */
     getPaths(serial, packageName) {
         this.#args = serial
             ? ["-s", serial, "shell", "pm", "path", packageName]
             : ["shell", "pm", "path", packageName];
-        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
-        const paths = result
+        const result = child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        if (result.status === 1) {
+            console.log('[ ERROR ] The package is not installed. Check for typos or use `getPackages` to list all packages.');
+            return undefined;
+        }
+        const paths = result.stdout
             .split("\n")
             .filter(line => line.trim() !== "")
             .map(line => line.replace(/^package:/, "").trim());
@@ -91,7 +120,7 @@ export default class Adb {
      * @param {string} outDir - Output directory
      * @returns {void}
      */
-    getAdb(serial, paths, outDir) {
+    pull(serial, paths, outDir) {
 
         const resolvedOutDir = path.resolve(outDir);
 

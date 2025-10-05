@@ -2,12 +2,15 @@
     "name": "localghost",
     "version": "0.1.1",
     "scripts": {
-        "start": "node ./src/aos/adb.js",
+        "start": "node ./src/aos/gadget.js",
         "test": "node --experimental-test-coverage --test ./tests/specs/*.js"
     },
     "type": "module",
     "volta": {
-        "node": "20.8.0",
-        "npm": "10.6.0"
+        "node": "24.9.0",
+        "npm": "11.6.1"
+    },
+    "devDependencies": {
+        "axios": "^1.12.2"
     }
 }
