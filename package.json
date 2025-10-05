@@ -1,13 +1,16 @@
 {
     "name": "localghost",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "scripts": {
-        "start": "node ./src/aos/adb.js",
+        "start": "node ./tests/fixtures/net/nmap.demo.js",
         "test": "node --experimental-test-coverage --test ./tests/specs/*.js"
     },
     "type": "module",
     "volta": {
         "node": "20.8.0",
         "npm": "10.6.0"
+    },
+    "dependencies": {
+        "xml2js": "^0.6.2"
     }
 }
