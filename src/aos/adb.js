@@ -140,6 +140,10 @@ export default class Adb {
 
     /**
      * Push a file to Android device
+     * @param {string} serial - Serial number of Android device
+     * @param {string} localFile - Local file path
+     * @param {string} remotePath - Remote file path on Android device
+     * @returns {void}
      */
     push(serial, localFile, remotePath) {
         this.#args = serial
