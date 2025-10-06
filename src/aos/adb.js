@@ -134,7 +134,17 @@ export default class Adb {
             this.#args = serial
                 ? ["-s", serial, "pull", path, resolvedOutDir]
                 : ["pull", path, resolvedOutDir];
-            child_process.execFileSync(this.#filePath, this.#args, this.#options);
+            child_process.spawnSync(this.#filePath, this.#args, this.#options);
         }
+    }
+
+    /**
+     * Push a file to Android device
+     */
+    push(serial, localFile, remotePath) {
+        this.#args = serial
+            ? ["-s", serial, "push", localFile, remotePath]
+            : ["push", localFile, remotePath];
+        child_process.spawnSync(this.#filePath, this.#args, this.#options);
     }
 }

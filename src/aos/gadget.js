@@ -11,11 +11,12 @@ import { cleanManifest, findMainActivity, patchSmali } from "./util.js";
 
 /**
  * 
- * @param {string | undefined} deviceName 
- * @param {string} packageName
- * @param {{ keyStorePassword: string, keyPassword: string, nameInfo: { name: string, organisation: string, location: string}}} keystoreOptions 
+ * @param {string | undefined} deviceName - Device serial number, if undefined the first connected device will be used
+ * @param {string} packageName - Name of target package
+ * @param {string} fridaScript - Path to the Frida script to be injected
+ * @param {object} keystoreOptions - Options for the keystore
  */
-async function gadget(deviceName, packageName, keystoreOptions) {
+async function gadget(deviceName, packageName, fridaScript, keystoreOptions) {
     const adb = new Adb('adb');
     // TODO: uncomment these before finalising the function
     // adb.killServer();
@@ -112,6 +113,8 @@ async function gadget(deviceName, packageName, keystoreOptions) {
     const libFridaGadgetPath = path.resolve(sharedLibApkDecodedPath, "lib", deviceArch, "libgadget.so");
     console.log("[ INFO ] Copying libfrida.so to", libFridaGadgetPath);
     fs.cpSync(libFridaCachedPath, libFridaGadgetPath, { force: true });
+    console.log("[ INFO ] Copying libfrida.config.so to", libFridaGadgetPath);
+    fs.cpSync(path.resolve("src", "aos", "gadget.config.json"), path.resolve(sharedLibApkDecodedPath, "lib", deviceArch, "libgadget.config.so"), { force: true });
 
     /* Find MainActivity */
     const mainActivity = await findMainActivity(path.resolve(baseApkDecodedPath, "AndroidManifest.xml"));
@@ -146,7 +149,9 @@ async function gadget(deviceName, packageName, keystoreOptions) {
     fs.rmSync(sharedLibApkDecodedPath, { recursive: true });
 
     /* Sign APK files */
-    
+
+    /* Push Frida Gadget config file to device */
+    adb.push(deviceName, fridaScript, "/data/local/tmp/frida.js");
 }
 
 gadget(undefined, 'com.krafton.crci', {});
