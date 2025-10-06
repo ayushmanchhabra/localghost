@@ -1,6 +1,7 @@
 import child_process from "node:child_process";
+import fs from "node:fs";
 import path from "node:path";
-import url from 'url';
+import url from "node:url";
 
 /**
  * Class representing apktool operations.
@@ -27,8 +28,8 @@ export default class Apktool {
      * @returns {void}
      */
     decode(apkFilePath, outDir) {
-        this.#args = ["decode", "--output", path.resolve(this.#dirname, outDir), path.resolve(this.#dirname, apkFilePath), "--no-res"]
-        const result = child_process.execFileSync(this.#filePath, this.#args, this.#options);
+        this.#args = ["decode", "--output", path.resolve(this.#dirname, outDir), path.resolve(this.#dirname, apkFilePath)]
+        child_process.spawnSync(this.#filePath, this.#args, this.#options);
     }
 
     /**
@@ -39,6 +40,7 @@ export default class Apktool {
      */
     build(apkDir, outFile) {
         this.#args = ["build", "--output", path.resolve(this.#dirname, outFile), path.resolve(this.#dirname, apkDir)]
-        child_process.execFileSync(this.#filePath, this.#args, this.#options);
+        fs.mkdirSync(path.resolve(this.#dirname, apkDir), { recursive: true });
+        child_process.spawnSync(this.#filePath, this.#args, this.#options);
     }
 }

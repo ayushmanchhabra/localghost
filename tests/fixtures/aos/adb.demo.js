@@ -13,4 +13,4 @@ console.log("\n\nPackages:", packages);
 const paths = adb.getPaths(undefined, "com.krafton.crci");
 
 // Extract APK into out directory
-adb.getAdb(undefined, paths, "./cookierun");
+adb.pull(undefined, paths, "./cookierun");

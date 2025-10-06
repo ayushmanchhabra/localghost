@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
+import stream from "node:stream";
 
 import axios from "axios";
 
 import Adb from './adb.js';
 import Apktool from './apktool.js';
 import Frida from './frida.js';
+import { cleanManifest, findMainActivity, patchSmali } from "./util.js";
 
 /**
  * 
@@ -13,7 +15,7 @@ import Frida from './frida.js';
  * @param {string} packageName
  * @param {{ keyStorePassword: string, keyPassword: string, nameInfo: { name: string, organisation: string, location: string}}} keystoreOptions 
  */
-function gadget(deviceName, packageName, keystoreOptions) {
+async function gadget(deviceName, packageName, keystoreOptions) {
     const adb = new Adb('adb');
     // TODO: uncomment these before finalising the function
     // adb.killServer();
@@ -41,6 +43,9 @@ function gadget(deviceName, packageName, keystoreOptions) {
         adb.pull(deviceName, paths, cachedPackageDir);
     }
 
+    /* Copy a copy of it to `out` dir, this will be replaced with the patched APKs */
+    fs.cpSync(path.resolve("cache", packageName), path.resolve("out", packageName), { recursive: true });
+
     /* Identify target files to patch. */
     const apkFiles = fs.readdirSync(cachedPackageDir);
     const deviceArch = adb.getDeviceArch(deviceName);
@@ -65,11 +70,11 @@ function gadget(deviceName, packageName, keystoreOptions) {
     /* Decode shared libraries APK or use cached version. */
     const sharedLibApkFilePath = path.join(cachedPackageDir, targetFiles[1]);
     const sharedLibApkDecodedPath = sharedLibApkFilePath.replace(/\.apk$/, "");
-    const normalisedDecodedPath = sharedLibApkDecodedPath.replace(/\\/g, "\\\\")
+    const normalisedDecodedPath = sharedLibApkDecodedPath.replace(/\\/g, "\\\\");
+
 
     if (fs.existsSync(normalisedDecodedPath)) {
         console.log("[ INFO ] Decoded", normalisedDecodedPath, "already exists, using that instead.");
-        return;
     } else {
         console.log("[ INFO ] Decoding", normalisedDecodedPath);
         apktool.decode(sharedLibApkFilePath, sharedLibApkDecodedPath);
@@ -77,20 +82,71 @@ function gadget(deviceName, packageName, keystoreOptions) {
 
     /* Get Frida version */
     const frida = new Frida("frida");
-    const version = frida.version();
-    console.log(version);
-
-    return;
+    const fridaVersion = frida.version();
+    console.log("[ INFO ] Frida version is", fridaVersion);
 
     /* Download Frida Gadget shared library. */
-    const libFridaGadgetPath = path.resolve(sharedLibApkDecodedPath, "lib", deviceArch, "libgadget.so");
-    const writeStream = fs.createWriteStream(libFridaGadgetPath);
+    const libFridaCachedPath = path.resolve("cache", "libgadget.so");
 
-    // axios({
-    //     method: 'get',
-    //     url: url,
-    //     responseType: 'stream'
-    // });
+    const writeStream = fs.createWriteStream(libFridaCachedPath);
+
+    if (fs.existsSync(libFridaCachedPath)) {
+        console.log("[ INFO ] libgadget.so at", libFridaCachedPath, "already exists, using that instead.");
+    } else {
+        console.log("[ INFO ] Downloading Frida Gadget shared library to", libFridaCachedPath);
+        let DEVICE_ARCH = "";
+        if (deviceArch.includes("arm64")) {
+            DEVICE_ARCH = "arm64";
+        }
+        const FRIDA_GADGET_URL = `https://github.com/frida/frida/releases/download/${fridaVersion}/frida-gadget-${fridaVersion}-android-${DEVICE_ARCH}.so.xz`.trim();
+        const response = await axios({
+            method: 'get',
+            url: FRIDA_GADGET_URL,
+            responseType: 'stream'
+        });
+
+        await stream.promises.pipeline(response.data, writeStream);
+    }
+
+    /* Insert Frida Gadget shared library into decoded APK. */
+    const libFridaGadgetPath = path.resolve(sharedLibApkDecodedPath, "lib", deviceArch, "libgadget.so");
+    console.log("[ INFO ] Copying libfrida.so to", libFridaGadgetPath);
+    fs.cpSync(libFridaCachedPath, libFridaGadgetPath, { force: true });
+
+    /* Find MainActivity */
+    const mainActivity = await findMainActivity(path.resolve(baseApkDecodedPath, "AndroidManifest.xml"));
+    console.log('[ INFO ] Main Activity found at', mainActivity);
+
+    /* Search for main activity */
+    const mainActivityPath = mainActivity.replace(/\./g, "/") + ".smali";
+    const dirs = fs.readdirSync(path.resolve(baseApkDecodedPath)).filter(s => s.startsWith("smali"));
+
+    let absoluteMainActivityPath = "";
+    for (const dir of dirs) {
+        const activityPath = path.join(baseApkDecodedPath, dir, mainActivityPath);
+        if (fs.existsSync(activityPath)) {
+            absoluteMainActivityPath = activityPath;
+        }
+    }
+
+    console.log("[ INFO ] Main activity path is at", absoluteMainActivityPath);
+    patchSmali(absoluteMainActivityPath);
+
+    const manifestPath = path.join(baseApkDecodedPath, "AndroidManifest.xml");
+    cleanManifest(manifestPath);
+
+    /* Rebuild patched APKs */
+    console.log("[ INFO ] Rebuilding base APK");
+    apktool.build(baseApkDecodedPath, path.resolve("out", packageName, "base.apk"));
+    console.log("[ INFO ] Remove decoded base APK");
+    fs.rmSync(baseApkDecodedPath, { recursive: true });
+    console.log("[ INFO ] Rebuilding shared library APK");
+    apktool.build(sharedLibApkDecodedPath, path.resolve("out", packageName, targetFiles[1]));
+    console.log("[ INFO ] Remove decoded shared library APK");
+    fs.rmSync(sharedLibApkDecodedPath, { recursive: true });
+
+    /* Sign APK files */
+    
 }
 
-gadget('a4032bb7', 'com.krafton.crci', {});
+gadget(undefined, 'com.krafton.crci', {});

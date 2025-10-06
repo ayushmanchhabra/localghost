@@ -16,12 +16,12 @@ export default class Frida {
 
     /**
      * Get Frida version
-     * @returns {child_process.SpawnSyncReturns<Buffer<ArrayBufferLike>>}
+     * @returns {string}
      */
     version() {
         console.log('[ INFO ] Getting Frida version.');
         this.#args = ["--version"];
         const result = child_process.spawnSync(this.#filePath, this.#args, this.#options);
-        return result;
+        return result.stdout.trim();
     }
 }
