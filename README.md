@@ -12,40 +12,22 @@ Security automation and instrumentation.
 1. Download/clone the repository.
 1. `cd localghost && npm i`
 
-### AOS
+### Network
 
-Use JavaScript to extract APK from Android device.
+Use JavaScript to discover hosts in a network.
 
 ```js
-import Adb from "./src/aos/adb.js";
+import Nmap from "./src/net/nmap.js";
 
-// Memu has its own adb.exe, hence the file path needs to be explicity passed.
-const adb = new Adb("C:\\Program Files\\Microvirt\\MEmu\\adb.exe");
+NMAP_PATH="/path/to/nmap.exe" // or just nmap if already added in the PATH variable
 
-const devices = adb.getConnectedDevices();
-console.log("\n\nConnected devices:", devices);
+const nmap = new Nmap(NMAP);
 
-const packages = adb.getPackages(undefined);
-console.log("\n\nPackages:", packages);
+const scan = await nmap.ping("ARP", "18.164.246.37/24");
 
-// Path to APK installation in Android device
-const paths = adb.getPaths(undefined, "com.android.chrome");
-
-// Extract APK into out directory
-adb.getAdb(undefined, paths, "./out");
+console.log(scan);
 ```
 
-## Roadmap
+## License
 
-- Add user specific script after decoding, before patching APK.
-- Create class to handle stdin, stderr and stdout.
-
-
-
-- Pull
-- Decode
-- Patch
-- Rebuilt
-- Align
-- Sign
-- Push
+MIT license

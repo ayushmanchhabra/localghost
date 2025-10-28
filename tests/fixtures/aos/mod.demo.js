@@ -6,7 +6,7 @@ import url from "node:url";
 import mod from "../../../src/aos/mod.js";
 import { cleanManifest } from "../../../src/aos/util.js";
 
-mod(undefined, 'com.xenius.pro', {
+mod(undefined, 'com.android.chrome', {
     dname: {
         CN: 'Developer',
         OU: 'IIT',
