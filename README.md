@@ -34,3 +34,18 @@ const paths = adb.getPaths(undefined, "com.android.chrome");
 // Extract APK into out directory
 adb.getAdb(undefined, paths, "./out");
 ```
+
+## Roadmap
+
+- Add user specific script after decoding, before patching APK.
+- Create class to handle stdin, stderr and stdout.
+
+
+
+- Pull
+- Decode
+- Patch
+- Rebuilt
+- Align
+- Sign
+- Push

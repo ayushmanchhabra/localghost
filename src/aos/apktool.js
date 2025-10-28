@@ -41,6 +41,7 @@ export default class Apktool {
     build(apkDir, outFile) {
         this.#args = ["build", "--output", path.resolve(this.#dirname, outFile), path.resolve(this.#dirname, apkDir)]
         fs.mkdirSync(path.resolve(this.#dirname, apkDir), { recursive: true });
-        child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        const res = child_process.spawnSync(this.#filePath, this.#args, this.#options);
+        console.log(res.stderr);
     }
 }

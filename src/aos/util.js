@@ -1,5 +1,4 @@
 import fs from "node:fs";
-import path from "node:path";
 
 import xml2js from "xml2js";
 
@@ -94,7 +93,7 @@ export function patchSmali(filePath) {
   }
 
   fs.writeFileSync(filePath, smali.join("\n"), "utf8");
-  console.log("[ INFO ]", filePath, "is", patched ? "patched": "not patched");
+  console.log("[ INFO ]", filePath, "is", patched ? "patched" : "not patched");
 }
 
 /**
@@ -103,22 +102,13 @@ export function patchSmali(filePath) {
  *
  * @param {string} manifestPath - Absolute path to decoded AndroidManifest.xml
  */
-export function cleanManifest(manifestPath) {
+export function cleanManifest(manifestPath, badAttrs) {
   if (!fs.existsSync(manifestPath)) {
     console.warn("[ WARN ] AndroidManifest.xml not found at", manifestPath);
     return;
   }
 
   let xml = fs.readFileSync(manifestPath, "utf8");
-
-  // List of attributes that often break Apktool builds (extend as needed)
-  const badAttrs = [
-    "android:pageSizeCompat",
-    "android:compileSdkVersionCodename",
-    "android:compileSdkVersion",
-    "android:isSplitRequired",
-    "android:isFeatureSplit",
-  ];
 
   for (const attr of badAttrs) {
     const regex = new RegExp(`\\s+${attr}="[^"]*"`, "g");
@@ -128,3 +118,25 @@ export function cleanManifest(manifestPath) {
   fs.writeFileSync(manifestPath, xml, "utf8");
   console.log("[ INFO ] Cleaned AndroidManifest.xml of unsupported attributes.");
 }
+
+export function setDebuggableTrue(manifestPath) {
+  if (!fs.existsSync(manifestPath)) {
+    console.warn("[ WARN ] AndroidManifest.xml not found at", manifestPath);
+    return;
+  }
+
+  let xml = fs.readFileSync(manifestPath, "utf8");
+
+  // If <application> tag already has android:debuggable attribute
+  if (xml.match(/<application[^>]*android:debuggable="/)) {
+    // Replace its value with "true"
+    xml = xml.replace(/(android:debuggable\s*=\s*")[^"]*(")/, '$1true$2');
+  } else {
+    // Otherwise, inject android:debuggable="true" into the <application> tag
+    xml = xml.replace(/<application\b([^>]*)>/, '<application$1 android:debuggable="true">');
+  }
+
+  fs.writeFileSync(manifestPath, xml, "utf8");
+  console.log("[ INFO ] Set android:debuggable=\"true\" in AndroidManifest.xml");
+}
+

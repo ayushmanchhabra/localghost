@@ -151,4 +151,32 @@ export default class Adb {
             : ["push", localFile, remotePath];
         child_process.spawnSync(this.#filePath, this.#args, this.#options);
     }
+
+    /**
+     * Install multiple APKs such as base and split_config APKs in one go
+     * @param {string} serial - Serial number of Android device
+     * @param {string} apkPaths - List of APKs
+     * @returns {void}
+     */
+    installMultiple(serial, apkPaths) {
+        const args = serial
+            ? ["-s", serial, "install-multiple", "-r", ...apkPaths]
+            : ["install-multiple", "-r", ...apkPaths];
+        const result = child_process.execFileSync(this.#filePath, args, this.#options);
+        return result.trim();
+    }
+
+    /**
+     * Uninstall APK
+     * @param {string} serial - Serial number of Android device
+     * @param {string} packageName - Name of package
+     * @returns {void}
+     */
+    uninstall(serial, packageName) {
+        const args = serial
+            ? ["-s", serial, "uninstall", packageName]
+            : ["uninstall", packageName];
+        const result = child_process.execFileSync(this.#filePath, args, this.#options);
+        return result.trim();
+    }
 }
