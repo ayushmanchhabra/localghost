@@ -12,18 +12,18 @@ Enumerate subdomains:
 
 ```shell
 bash ./info/enumerate_subdomains.sh
-cat ./info/enumerate_subdomains.cat
+cat ./info/enumerate_subdomains.csv
 ```
 
 Enumerate services:
 
 ```shell
-bash ./info/enumerate_services.sh
-cat ./info/enumerate_services.cat
+bash ./info/enumerate_services.sh ./enumerate_subdomains.csv
+cat ./info/enumerate_services.csv
 ```
 
 Check sub resource integrity:
 
 ```shell
-bash ./va/sub_resource_integrity.sh https://example.com
+bash ./va/sub_resource_integrity.sh ./enumerate_services.csv
 ```
