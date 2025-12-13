@@ -2,7 +2,7 @@
     "name": "localghost",
     "version": "0.2.0",
     "scripts": {
-        "start": "node ./tests/fixtures/aos/mod.demo.js",
+        "start": "bash ./third_party/hunter/enumerate.sh",
         "test": "node --experimental-test-coverage --test ./tests/specs/*.js"
     },
     "type": "module",
@@ -12,6 +12,8 @@
     },
     "dependencies": {
         "axios": "^1.12.2",
+        "chromedriver": "^142.0.3",
+        "selenium-webdriver": "^4.38.0",
         "xml2js": "^0.6.2"
     }
 }
