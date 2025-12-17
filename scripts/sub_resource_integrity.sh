@@ -1,14 +1,15 @@
 #!/bin/bash
 
-SERVICES_CSV="$1"
+SERVICES_CSV=$1
 OUTPUT="sub_resource_integrity.csv"
 
 # Add CSV header
 echo "subdomain,resource" > "$OUTPUT"
 
 while IFS=, read -r subdomain ip port state service version; do
+    echo "READ: $subdomain $port $state"
     # Only process if port is 443 and state is open
-    if [[ "$port" == "443" && "$state" == "open" ]]; then
+    if [[ "$port" == "443/tcp" && "$state" == "open" ]] || [[ "$port" == "80/tcp" && "$state" == "open" ]]; then
         echo "Processing $subdomain..."
         html_file="$subdomain.html"
         curl -s "https://$subdomain" -o "$html_file"
