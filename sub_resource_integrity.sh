@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SERVICES_CSV=$1
-OUTPUT="sub_resource_integrity.csv"
+OUTPUT=$2
 
 # Add CSV header
 echo "subdomain,resource" > "$OUTPUT"
