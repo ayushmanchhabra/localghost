@@ -28,6 +28,22 @@ const scan = await nmap.ping("ARP", "18.164.246.37/24");
 console.log(scan);
 ```
 
+## Bug Bounty
+
+Enumerate subdomains and services:
+
+```shell
+chmod +x ./enumerate.sh
+./enumerate.sh domain.com ./subdomains.csv
+```
+
+Identify common vulnerabilities:
+
+```shell
+chmod +x ./identify.sh
+./enumerate.sh ./subdomains.csv ./vulns.csv
+```
+
 ## License
 
 MIT license
