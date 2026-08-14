@@ -1,0 +1,47 @@
+{
+  "name": "localghost",
+  "main": "http://localhost:8080",
+  "node-remote": "http://localhost:8080",
+  "node-main": "",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "postinstall": "",
+    "doc": "node .github/config/doc.js",
+    "dev": "concurrently -k npm:dev:website npm:dev:desktop",
+    "dev:website": "esbuild ./src/website/main.tsx --bundle --outdir=./src/website --watch --servedir=./src/website --serve=8080",
+    "dev:desktop": "wait-on -c .github/config/wait.json http-get://localhost:8080 && .github/config/dev.js",
+    "bld": "npm run bld:website && npm run bld:desktop",
+    "bld:website": "cp ./src/website/index.html ./src/desktop/index.html && esbuild ./src/website/main.tsx --bundle --outdir=./desktop",
+    "bld:desktop": "node .github/config/bld.js"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@nwutils/doctor": "^0.1.0",
+    "@nwutils/getter": "^0.2.5",
+    "@nwutils/runner": "^0.2.3",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "concurrently": "^10.0.4",
+    "esbuild": "^0.28.2",
+    "nw-builder": "^4.18.0",
+    "typescript": "^7.0.2",
+    "wait-on": "^9.1.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "onFail": "warn",
+      "version": "26.7.0"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": "12.0.2",
+      "onFail": "warn"
+    }
+  }
+}
