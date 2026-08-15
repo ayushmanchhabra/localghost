@@ -13,7 +13,8 @@
     "dev:desktop": "wait-on -c .github/config/wait.json http-get://localhost:8080 && .github/config/dev.js",
     "bld": "npm run bld:website && npm run bld:desktop",
     "bld:website": "cp ./src/website/index.html ./src/desktop/index.html && esbuild ./src/website/main.tsx --bundle --outdir=./desktop",
-    "bld:desktop": "node .github/config/bld.js"
+    "bld:desktop": "node .github/config/bld.js",
+    "e2e": "node --test --experimental-test-coverage --test-coverage-exclude=\"tests/**/*\" \"tests/specs/*.test.js\""
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -29,6 +30,7 @@
     "concurrently": "^10.0.4",
     "esbuild": "^0.28.2",
     "nw-builder": "^4.18.0",
+    "selenium-webdriver": "^4.47.0",
     "typescript": "^7.0.2",
     "wait-on": "^9.1.0"
   },
