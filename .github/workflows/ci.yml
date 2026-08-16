@@ -21,8 +21,7 @@ jobs:
           - macos-26
           - macos-26-intel
           - ubuntu-24.04
-          # TODO: uncomment once https://github.com/nwjs/nw.js/issues/8373 is resolved
-          # - ubuntu-24.04-arm
+          - ubuntu-24.04-arm
           - windows-2025
           - windows-11-arm
         include:
@@ -33,9 +32,8 @@ jobs:
           - os: ubuntu-24.04
             display: Ubuntu 24.04 Intel
           - os: ubuntu-24.04-arm
-            # TODO: uncomment once https://github.com/nwjs/nw.js/issues/8373 is resolved
-            #   display: Ubuntu 24.04 ARM
-            # - os: windows-2025
+            display: Ubuntu 24.04 ARM
+          - os: windows-2025
             display: Windows 11 Intel
           - os: windows-11-arm
             display: Windows 11 (ARM)
