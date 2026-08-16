@@ -1,8 +1,6 @@
 const options = {
     version: "0.114.1",
     flavor: "sdk",
-    platform: "linux",
-    arch: "x64",
     downloadUrl: "https://dl.nwjs.io",
     manifestUrl: "https://nwjs.io/versions.json",
     cacheDir: "./cache",

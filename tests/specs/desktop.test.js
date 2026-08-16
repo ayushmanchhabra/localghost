@@ -4,16 +4,22 @@ import path from 'node:path';
 import process from 'node:process';
 import { after, before, describe, it } from 'node:test';
 
+import get from "@nwutils/getter";
 import selenium from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
+
+import nwOptions from "../../.github/config/opt.js";
 
 describe('NW.js Selenium ServiceBuilder test suite', async () => {
     let driver = undefined;
 
     /* Setup Selenium driver. */
     before(async function () {
+        /* Get NW.js  */
+        await get(nwOptions);
+
         /* Initialise Chrome options */
-        const options = new chrome.Options();
+        const chromeOptions = new chrome.Options();
 
         const seleniumArguments = [
             'nwapp=' + path.resolve('src', 'desktop')
@@ -24,14 +30,19 @@ describe('NW.js Selenium ServiceBuilder test suite', async () => {
             seleniumArguments.push('headless=new');
         }
 
-        options.addArguments(seleniumArguments);
+        chromeOptions.addArguments(seleniumArguments);
 
-        const chromeDriverPath = path.resolve('cache', 'nwjs-sdk-v0.114.1-linux-x64', 'chromedriver');
+        let nwDirPath = path.resolve(
+            nwOptions.cacheDir,
+            `nwjs${nwOptions.flavor === "sdk" ? "-sdk" : ""}-v${nwOptions.version}-${nwOptions.platform}-${nwOptions.arch}`,
+        );
+
+        const chromeDriverPath = path.resolve(nwDirPath, 'chromedriver');
         /* Pass file path of NW.js ChromeDriver to ServiceBuilder */
         const service = new chrome.ServiceBuilder(chromeDriverPath).build();
 
         /* Create a new session using the Chromium options and DriverService defined above. */
-        driver = chrome.Driver.createSession(options, service);
+        driver = chrome.Driver.createSession(chromeOptions, service);
     });
 
     /**
