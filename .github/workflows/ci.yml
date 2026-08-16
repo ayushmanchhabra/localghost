@@ -48,6 +48,10 @@ jobs:
         uses: actions/setup-node@v7.0.0
         with:
           node-version: "26.7.0"
+          cache: "npm"
+
+      - name: Setup npm
+        run: npm i -g npm@12.0.2
 
       - name: Install third party dependencies
         run: npm ci --legacy-peer-deps
@@ -60,6 +64,10 @@ jobs:
 
       - name: Check for linting errors
         run: npm run lint
+
+      - name: Diagnose NW.js shared library dependencies
+        if: runner.os == 'Linux'
+        run: node .github/config/diagnose.js
 
       - name: Run test suite
         run: npm run e2e
