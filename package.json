@@ -17,7 +17,7 @@
     "dev:css": "tailwindcss -i ./src/website/styles.css -o ./src/desktop/styles.css --watch",
     "dev:desktop": "wait-on -c .github/config/wait.json http-get://localhost:8080 && .github/config/dev.js",
     "bld": "npm run bld:website && npm run bld:desktop",
-    "bld:website": "cp ./src/website/index.html ./src/desktop/index.html && esbuild ./src/website/main.tsx --bundle --outdir=./desktop && tailwindcss -i ./src/website/styles.css -o ./src/desktop/styles.css --minify",
+    "bld:website": "cp ./src/website/index.html ./src/desktop/index.html && esbuild ./src/website/main.tsx --bundle --outdir=./src/desktop && tailwindcss -i ./src/website/styles.css -o ./src/desktop/styles.css --minify",
     "bld:desktop": "node .github/config/bld.js",
     "e2e": "node --test --experimental-test-coverage --test-coverage-exclude=\"tests/**/*\" \"tests/specs/*.test.js\""
   },
