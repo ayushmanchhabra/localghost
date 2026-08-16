@@ -50,7 +50,7 @@ jobs:
           node-version: "26.7.0"
 
       - name: Install third party dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Check third party vulnerabilities
         run: npm audit
@@ -58,8 +58,8 @@ jobs:
       - name: Check for formatting errors
         run: npm run format
 
-      #- name: Check for linting errors
-      #  run: npm run lint
+      - name: Check for linting errors
+        run: npm run lint
 
       - name: Run test suite
         run: npm run e2e
