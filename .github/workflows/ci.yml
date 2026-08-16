@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v7.0.0
         with:
-          node-version: '26.7.0'
+          node-version: "26.7.0"
 
       - name: Install third party dependencies
         run: npm ci
@@ -55,8 +55,8 @@ jobs:
       - name: Check third party vulnerabilities
         run: npm audit
 
-      #- name: Check for formatting errors
-      #  run: npm run format
+      - name: Check for formatting errors
+        run: npm run format
 
       #- name: Check for linting errors
       #  run: npm run lint
