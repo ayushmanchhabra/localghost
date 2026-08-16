@@ -69,6 +69,27 @@ jobs:
         if: runner.os == 'Linux'
         run: node .github/config/diagnose.js
 
+      - name: Diagnose usable virtual address space
+        if: runner.os == 'Linux'
+        run: |
+          uname -m
+          python3 - <<'PY'
+          import mmap
+          for tib in [1, 0.5, 0.25, 0.125, 0.0625]:
+              size = int(tib * 1024 ** 4)
+              try:
+                  m = mmap.mmap(
+                      -1,
+                      size,
+                      flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS | mmap.MAP_NORESERVE,
+                      prot=0,
+                  )
+                  m.close()
+                  print(f"{tib} TiB reservation: OK")
+              except OSError as e:
+                  print(f"{tib} TiB reservation: FAILED ({e})")
+          PY
+
       - name: Run test suite
         run: npm run e2e
         env:
