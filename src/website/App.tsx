@@ -1,5 +1,5 @@
-import React from "react";
+import Proxy from "./proxy/Proxy";
 
 export default function App() {
-  return <div id="test">Hello, World!</div>;
+  return <Proxy />;
 }

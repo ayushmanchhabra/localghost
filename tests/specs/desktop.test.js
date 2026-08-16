@@ -1,11 +1,9 @@
-import { equal } from "node:assert";
 import { assert } from "node:console";
 import path from "node:path";
 import process from "node:process";
 import { after, before, describe, it } from "node:test";
 
 import get from "@nwutils/getter";
-import selenium from "selenium-webdriver";
 import chrome from "selenium-webdriver/chrome.js";
 
 import nwOptions from "../../.github/config/opt.js";

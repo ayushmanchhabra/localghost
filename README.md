@@ -9,4 +9,6 @@ AI security companion.
 
 ## Roadmap
 
-- [ ] UI
+### Chores
+
+- Comvert all Node manifest `scripts`'s CLI commands to Node.js scripts.
