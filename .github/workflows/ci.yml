@@ -81,7 +81,7 @@ jobs:
                   m = mmap.mmap(
                       -1,
                       size,
-                      flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS | mmap.MAP_NORESERVE,
+                      flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS,
                       prot=0,
                   )
                   m.close()
