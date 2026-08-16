@@ -21,7 +21,8 @@ jobs:
           - macos-26
           - macos-26-intel
           - ubuntu-24.04
-          - ubuntu-24.04-arm
+          # TODO: uncomment once https://github.com/nwjs/nw.js/issues/8373 is resolved
+          # - ubuntu-24.04-arm
           - windows-2025
           - windows-11-arm
         include:
@@ -32,8 +33,9 @@ jobs:
           - os: ubuntu-24.04
             display: Ubuntu 24.04 Intel
           - os: ubuntu-24.04-arm
-            display: Ubuntu 24.04 ARM
-          - os: windows-2025
+          # TODO: uncomment once https://github.com/nwjs/nw.js/issues/8373 is resolved
+          #   display: Ubuntu 24.04 ARM
+          # - os: windows-2025
             display: Windows 11 Intel
           - os: windows-11-arm
             display: Windows 11 (ARM)
@@ -64,31 +66,6 @@ jobs:
 
       - name: Check for linting errors
         run: npm run lint
-
-      - name: Diagnose NW.js shared library dependencies
-        if: runner.os == 'Linux'
-        run: node .github/config/diagnose.js
-
-      - name: Diagnose usable virtual address space
-        if: runner.os == 'Linux'
-        run: |
-          uname -m
-          python3 - <<'PY'
-          import mmap
-          for tib in [1, 0.5, 0.25, 0.125, 0.0625]:
-              size = int(tib * 1024 ** 4)
-              try:
-                  m = mmap.mmap(
-                      -1,
-                      size,
-                      flags=mmap.MAP_PRIVATE | mmap.MAP_ANONYMOUS,
-                      prot=0,
-                  )
-                  m.close()
-                  print(f"{tib} TiB reservation: OK")
-              except OSError as e:
-                  print(f"{tib} TiB reservation: FAILED ({e})")
-          PY
 
       - name: Run test suite
         run: npm run e2e
