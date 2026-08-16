@@ -8,5 +8,5 @@ if (!el) throw new Error("#root not found");
 createRoot(el).render(
   <StrictMode>
     <App />
-  </StrictMode>
+  </StrictMode>,
 );
