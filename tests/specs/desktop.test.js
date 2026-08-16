@@ -52,7 +52,7 @@ describe("NW.js Selenium ServiceBuilder test suite", async () => {
   /**
    * Quit Selenium driver.
    */
-  after(() => {
-    driver.quit();
+  after(async () => {
+    await driver.quit();
   });
 });
