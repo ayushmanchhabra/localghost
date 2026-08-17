@@ -1,15 +1,16 @@
 import { useState } from "react";
 
-import { capturedExchanges } from "./data";
 import { methodColor, rawRequest, rawResponse, statusColor } from "./format";
 import type { CapturedExchange } from "./types";
+import { useCapturedExchanges } from "./useCapturedExchanges";
 
 function header(headers: [string, string][], name: string): string | undefined {
   return headers.find(([key]) => key.toLowerCase() === name.toLowerCase())?.[1];
 }
 
 export default function Proxy() {
-  const [selectedId, setSelectedId] = useState<string>(capturedExchanges[0].id);
+  const capturedExchanges = useCapturedExchanges();
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [intercepting, setIntercepting] = useState(false);
 
   const selected: CapturedExchange | undefined = capturedExchanges.find(

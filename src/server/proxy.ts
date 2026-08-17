@@ -6,6 +6,9 @@ import http, {
 import https from "node:https";
 import net, { type Socket } from "node:net";
 
+import { BodyCollector, recordExchange, toHeaderPairs } from "./capture.ts";
+import type { HttpMethod } from "../website/proxy/types.ts";
+
 const HOP_BY_HOP_HEADERS = new Set([
   "connection",
   "keep-alive",
@@ -50,6 +53,10 @@ function handleRequest(
 
   const client = target.protocol === "https:" ? https : http;
   const defaultPort = target.protocol === "https:" ? 443 : 80;
+  const method = (clientReq.method ?? "GET").toUpperCase() as HttpMethod;
+
+  const requestBody = new BodyCollector();
+  clientReq.on("data", (chunk: Buffer) => requestBody.push(chunk));
 
   const upstreamReq = client.request(
     {
@@ -65,6 +72,27 @@ function handleRequest(
         stripHopByHopHeaders(upstreamRes.headers),
       );
       upstreamRes.pipe(clientRes);
+
+      const responseBody = new BodyCollector();
+      upstreamRes.on("data", (chunk: Buffer) => responseBody.push(chunk));
+      upstreamRes.on("end", () => {
+        recordExchange({
+          request: {
+            method,
+            scheme: target.protocol === "https:" ? "https" : "http",
+            host: target.host,
+            path: `${target.pathname}${target.search}`,
+            headers: toHeaderPairs(clientReq.headers),
+            body: requestBody.toBody(),
+          },
+          response: {
+            status: upstreamRes.statusCode ?? 0,
+            statusText: upstreamRes.statusMessage ?? "",
+            headers: toHeaderPairs(upstreamRes.headers),
+            body: responseBody.toBody(),
+          },
+        });
+      });
     },
   );
 
