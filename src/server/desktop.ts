@@ -3,6 +3,7 @@
 // defaults documented for FoxyProxy (127.0.0.1:8080) and exposes the
 // capture API on `module.exports`, reachable from the window's DOM
 // context via `process.mainModule.exports`.
+import { exportCACertificate, getCACertificateInfo } from "./ca.ts";
 import { getExchanges, onExchange } from "./capture.ts";
 import { createProxyServer } from "./proxy.ts";
 
@@ -19,4 +20,4 @@ server.listen(PORT, HOST, () => {
   console.log(`[proxy] listening on http://${HOST}:${PORT}`);
 });
 
-export { getExchanges, onExchange };
+export { exportCACertificate, getCACertificateInfo, getExchanges, onExchange };

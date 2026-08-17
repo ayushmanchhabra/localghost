@@ -4,6 +4,7 @@ export interface ProxyCliOptions {
   host: string;
   port: number;
   protocol: "http";
+  exportCa?: string;
 }
 
 const SUPPORTED_PROTOCOLS = ["http"];
@@ -15,6 +16,7 @@ export function parseCliArgs(argv: string[]): ProxyCliOptions {
       host: { type: "string", default: "127.0.0.1" },
       port: { type: "string", default: "8080" },
       protocol: { type: "string", default: "http" },
+      "export-ca": { type: "string" },
     },
   });
 
@@ -35,5 +37,6 @@ export function parseCliArgs(argv: string[]): ProxyCliOptions {
     host: values.host as string,
     port,
     protocol: values.protocol as "http",
+    exportCa: values["export-ca"] as string | undefined,
   };
 }

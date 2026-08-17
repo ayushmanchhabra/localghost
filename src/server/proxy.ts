@@ -4,8 +4,10 @@ import http, {
   type ServerResponse,
 } from "node:http";
 import https from "node:https";
-import net, { type Socket } from "node:net";
+import { type Socket } from "node:net";
+import tls from "node:tls";
 
+import { getLeafCertificate, type LeafCertificate } from "./ca.ts";
 import { BodyCollector, recordExchange, toHeaderPairs } from "./capture.ts";
 import type { HttpMethod } from "../website/proxy/types.ts";
 
@@ -34,7 +36,91 @@ function stripHopByHopHeaders(
   return forwarded;
 }
 
-// Forwards a plain-HTTP request whose request-target is an absolute-URI,
+function formatHost(
+  hostname: string,
+  port: number,
+  defaultPort: number,
+): string {
+  return port === defaultPort ? hostname : `${hostname}:${port}`;
+}
+
+interface ProxyTarget {
+  scheme: "http" | "https";
+  hostname: string;
+  port: number;
+}
+
+// Forwards a request to `target`, capturing the full exchange. Used both
+// for plain-HTTP requests (an absolute-URI request-target) and for
+// requests decrypted off an intercepted HTTPS tunnel (a relative
+// request-target, with the target known from the CONNECT that preceded
+// it — see handleConnect).
+function proxyRequest(
+  clientReq: IncomingMessage,
+  clientRes: ServerResponse,
+  target: ProxyTarget,
+  path: string,
+): void {
+  const method = (clientReq.method ?? "GET").toUpperCase() as HttpMethod;
+  const client = target.scheme === "https" ? https : http;
+  const defaultPort = target.scheme === "https" ? 443 : 80;
+
+  const requestBody = new BodyCollector();
+  clientReq.on("data", (chunk: Buffer) => requestBody.push(chunk));
+
+  const upstreamReq = client.request(
+    {
+      hostname: target.hostname,
+      port: target.port,
+      method: clientReq.method,
+      path,
+      headers: stripHopByHopHeaders(clientReq.headers),
+      ...(target.scheme === "https" ? { servername: target.hostname } : {}),
+    },
+    (upstreamRes) => {
+      clientRes.writeHead(
+        upstreamRes.statusCode ?? 502,
+        stripHopByHopHeaders(upstreamRes.headers),
+      );
+      upstreamRes.pipe(clientRes);
+
+      const responseBody = new BodyCollector();
+      upstreamRes.on("data", (chunk: Buffer) => responseBody.push(chunk));
+      upstreamRes.on("end", () => {
+        recordExchange({
+          request: {
+            method,
+            scheme: target.scheme,
+            host: formatHost(target.hostname, target.port, defaultPort),
+            path,
+            headers: toHeaderPairs(clientReq.headers),
+            body: requestBody.toBody(),
+          },
+          response: {
+            status: upstreamRes.statusCode ?? 0,
+            statusText: upstreamRes.statusMessage ?? "",
+            headers: toHeaderPairs(upstreamRes.headers),
+            body: responseBody.toBody(),
+          },
+        });
+      });
+    },
+  );
+
+  upstreamReq.on("error", (err) => {
+    console.error(
+      `[proxy] upstream error for ${target.scheme}://${target.hostname}:${target.port}${path}: ${err.message}`,
+    );
+    if (!clientRes.headersSent) {
+      clientRes.writeHead(502, { "Content-Type": "text/plain" });
+    }
+    clientRes.end("Bad Gateway");
+  });
+
+  clientReq.pipe(upstreamReq);
+}
+
+// Handles a plain-HTTP request whose request-target is an absolute-URI,
 // e.g. "GET http://example.com/path HTTP/1.1" — how clients address a
 // forward proxy, as opposed to an origin server.
 function handleRequest(
@@ -51,67 +137,43 @@ function handleRequest(
     return;
   }
 
-  const client = target.protocol === "https:" ? https : http;
-  const defaultPort = target.protocol === "https:" ? 443 : 80;
-  const method = (clientReq.method ?? "GET").toUpperCase() as HttpMethod;
+  const scheme = target.protocol === "https:" ? "https" : "http";
+  const port = target.port
+    ? Number(target.port)
+    : scheme === "https"
+      ? 443
+      : 80;
+  const path = `${target.pathname}${target.search}`;
 
-  const requestBody = new BodyCollector();
-  clientReq.on("data", (chunk: Buffer) => requestBody.push(chunk));
-
-  const upstreamReq = client.request(
-    {
-      hostname: target.hostname,
-      port: target.port ? Number(target.port) : defaultPort,
-      method: clientReq.method,
-      path: `${target.pathname}${target.search}`,
-      headers: stripHopByHopHeaders(clientReq.headers),
-    },
-    (upstreamRes) => {
-      clientRes.writeHead(
-        upstreamRes.statusCode ?? 502,
-        stripHopByHopHeaders(upstreamRes.headers),
-      );
-      upstreamRes.pipe(clientRes);
-
-      const responseBody = new BodyCollector();
-      upstreamRes.on("data", (chunk: Buffer) => responseBody.push(chunk));
-      upstreamRes.on("end", () => {
-        recordExchange({
-          request: {
-            method,
-            scheme: target.protocol === "https:" ? "https" : "http",
-            host: target.host,
-            path: `${target.pathname}${target.search}`,
-            headers: toHeaderPairs(clientReq.headers),
-            body: requestBody.toBody(),
-          },
-          response: {
-            status: upstreamRes.statusCode ?? 0,
-            statusText: upstreamRes.statusMessage ?? "",
-            headers: toHeaderPairs(upstreamRes.headers),
-            body: responseBody.toBody(),
-          },
-        });
-      });
-    },
+  proxyRequest(
+    clientReq,
+    clientRes,
+    { scheme, hostname: target.hostname, port },
+    path,
   );
-
-  upstreamReq.on("error", (err) => {
-    console.error(`[proxy] upstream error for ${target.href}: ${err.message}`);
-    if (!clientRes.headersSent) {
-      clientRes.writeHead(502, { "Content-Type": "text/plain" });
-    }
-    clientRes.end("Bad Gateway");
-  });
-
-  clientReq.pipe(upstreamReq);
-
   console.log(`[proxy] ${clientReq.method} ${target.href}`);
 }
 
-// Handles CONNECT, which browsers use to tunnel HTTPS (and other TCP)
-// traffic through the proxy. The proxy relays bytes opaquely — it does not
-// terminate TLS or inspect the tunneled traffic.
+// Handles a request decrypted off an intercepted HTTPS tunnel. Post
+// -CONNECT requests use origin-form (a relative path plus a Host
+// header), so the target — known since the CONNECT that preceded this
+// tunnel — is passed in rather than parsed from the request line.
+function handleInterceptedRequest(
+  clientReq: IncomingMessage,
+  clientRes: ServerResponse,
+  hostname: string,
+  port: number,
+): void {
+  const path = clientReq.url ?? "/";
+  proxyRequest(clientReq, clientRes, { scheme: "https", hostname, port }, path);
+  console.log(`[proxy] ${clientReq.method} https://${hostname}${path}`);
+}
+
+// Handles CONNECT, which browsers use to tunnel HTTPS through the
+// proxy. Rather than relaying opaque bytes, this terminates TLS with a
+// certificate minted for the target host (signed by the local CA — see
+// ca.ts) and re-encrypts outbound to the real origin, so requests and
+// responses can be parsed and captured like plain HTTP.
 function handleConnect(
   clientReq: IncomingMessage,
   clientSocket: Socket,
@@ -125,24 +187,48 @@ function handleConnect(
     return;
   }
 
-  const upstreamSocket = net.connect(port, hostname, () => {
-    clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
-    if (head.length > 0) {
-      upstreamSocket.write(head);
-    }
-    upstreamSocket.pipe(clientSocket);
-    clientSocket.pipe(upstreamSocket);
-  });
-
-  upstreamSocket.on("error", (err) => {
+  let leaf: LeafCertificate;
+  try {
+    leaf = getLeafCertificate(hostname);
+  } catch (err) {
     console.error(
-      `[proxy] tunnel error for ${hostname}:${port}: ${err.message}`,
+      `[proxy] failed to mint a certificate for ${hostname}: ${(err as Error).message}`,
     );
-    clientSocket.destroy();
-  });
-  clientSocket.on("error", () => upstreamSocket.destroy());
+    clientSocket.end("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+    return;
+  }
 
-  console.log(`[proxy] CONNECT ${hostname}:${port}`);
+  clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
+  // Anything the HTTP parser already read past the CONNECT headers is
+  // the start of the client's TLS handshake — put it back so the
+  // TLSSocket below sees it.
+  if (head.length > 0) clientSocket.unshift(head);
+
+  const tlsSocket = new tls.TLSSocket(clientSocket, {
+    isServer: true,
+    cert: leaf.certPem,
+    key: leaf.keyPem,
+    ALPNProtocols: ["http/1.1"],
+  });
+
+  tlsSocket.on("error", (err) => {
+    console.error(
+      `[proxy] TLS handshake error for ${hostname}: ${err.message}`,
+    );
+  });
+
+  // http.Server normally parses requests off sockets it accepted
+  // itself; emit("connection", ...) hands it one we've already
+  // decrypted instead, so it dispatches parsed requests the same way.
+  const interceptServer = http.createServer((req, res) =>
+    handleInterceptedRequest(req, res, hostname, port),
+  );
+  interceptServer.on("clientError", (_err, socket) => {
+    if (socket.writable) socket.end();
+  });
+  interceptServer.emit("connection", tlsSocket);
+
+  console.log(`[proxy] CONNECT ${hostname}:${port} (intercepting)`);
 }
 
 export function createProxyServer(): http.Server {

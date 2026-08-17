@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 
 import { methodColor, rawRequest, rawResponse, statusColor } from "./format";
+import { getServerBridge } from "./serverBridge";
 import type { CapturedExchange } from "./types";
 import { useCapturedExchanges } from "./useCapturedExchanges";
 
@@ -12,10 +13,18 @@ export default function Proxy() {
   const capturedExchanges = useCapturedExchanges();
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [intercepting, setIntercepting] = useState(false);
+  const bridge = getServerBridge();
+  const caFileInputRef = useRef<HTMLInputElement>(null);
 
   const selected: CapturedExchange | undefined = capturedExchanges.find(
     (entry) => entry.id === selectedId,
   );
+
+  function handleCAFileChosen(event: ChangeEvent<HTMLInputElement>) {
+    const destinationPath = event.target.value;
+    event.target.value = "";
+    if (destinationPath) bridge?.exportCACertificate(destinationPath);
+  }
 
   return (
     <div className="flex h-screen w-screen flex-col bg-neutral-950 text-neutral-200">
@@ -51,6 +60,22 @@ export default function Proxy() {
             className="rounded border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-medium text-neutral-300 hover:bg-neutral-700"
           >
             Clear
+          </button>
+          <input
+            ref={caFileInputRef}
+            type="file"
+            nwsaveas="localghost-ca.pem"
+            className="hidden"
+            onChange={handleCAFileChosen}
+          />
+          <button
+            type="button"
+            disabled={!bridge}
+            onClick={() => caFileInputRef.current?.click()}
+            title={bridge ? undefined : "Only available in the desktop app"}
+            className="rounded border border-neutral-700 bg-neutral-800 px-2.5 py-1 text-xs font-medium text-neutral-300 hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-neutral-800"
+          >
+            Export CA Certificate
           </button>
         </div>
       </header>
