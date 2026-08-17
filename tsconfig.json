@@ -10,7 +10,9 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node", "react", "react-dom"]
   },
   "include": ["src"]
 }
