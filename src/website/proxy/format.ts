@@ -1,7 +1,6 @@
-import type { CapturedExchange, HttpMethod } from "./types";
+import type { CapturedExchange, CapturedRequest, HttpMethod } from "./types";
 
-export function rawRequest(entry: CapturedExchange): string {
-  const { request } = entry;
+export function rawRequest(request: CapturedRequest): string {
   const lines = [
     `${request.method} ${request.path} HTTP/1.1`,
     ...request.headers.map(([name, value]) => `${name}: ${value}`),

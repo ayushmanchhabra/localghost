@@ -9,6 +9,7 @@ import tls from "node:tls";
 
 import { getLeafCertificate, type LeafCertificate } from "./ca.ts";
 import { BodyCollector, recordExchange, toHeaderPairs } from "./capture.ts";
+import { awaitInterceptDecision, isInterceptEnabled } from "./intercept.ts";
 import type { HttpMethod } from "../website/proxy/types.ts";
 
 const HOP_BY_HOP_HEADERS = new Set([
@@ -54,7 +55,9 @@ interface ProxyTarget {
 // for plain-HTTP requests (an absolute-URI request-target) and for
 // requests decrypted off an intercepted HTTPS tunnel (a relative
 // request-target, with the target known from the CONNECT that preceded
-// it — see handleConnect).
+// it — see handleConnect). When interception is on, the request is
+// held (fully buffered, not yet sent anywhere) until the UI forwards or
+// drops it.
 function proxyRequest(
   clientReq: IncomingMessage,
   clientRes: ServerResponse,
@@ -64,60 +67,99 @@ function proxyRequest(
   const method = (clientReq.method ?? "GET").toUpperCase() as HttpMethod;
   const client = target.scheme === "https" ? https : http;
   const defaultPort = target.scheme === "https" ? 443 : 80;
+  const host = formatHost(target.hostname, target.port, defaultPort);
 
   const requestBody = new BodyCollector();
   clientReq.on("data", (chunk: Buffer) => requestBody.push(chunk));
 
-  const upstreamReq = client.request(
-    {
-      hostname: target.hostname,
-      port: target.port,
-      method: clientReq.method,
-      path,
-      headers: stripHopByHopHeaders(clientReq.headers),
-      ...(target.scheme === "https" ? { servername: target.hostname } : {}),
-    },
-    (upstreamRes) => {
-      clientRes.writeHead(
-        upstreamRes.statusCode ?? 502,
-        stripHopByHopHeaders(upstreamRes.headers),
-      );
-      upstreamRes.pipe(clientRes);
+  // `replayBody`, when given, is the already-buffered body of a
+  // request that was held for interception — it's written directly
+  // instead of live-piping clientReq (which has already ended by then).
+  function sendUpstream(replayBody?: Buffer): void {
+    const upstreamReq = client.request(
+      {
+        hostname: target.hostname,
+        port: target.port,
+        method: clientReq.method,
+        path,
+        headers: stripHopByHopHeaders(clientReq.headers),
+        ...(target.scheme === "https" ? { servername: target.hostname } : {}),
+      },
+      (upstreamRes) => {
+        clientRes.writeHead(
+          upstreamRes.statusCode ?? 502,
+          stripHopByHopHeaders(upstreamRes.headers),
+        );
+        upstreamRes.pipe(clientRes);
 
-      const responseBody = new BodyCollector();
-      upstreamRes.on("data", (chunk: Buffer) => responseBody.push(chunk));
-      upstreamRes.on("end", () => {
-        recordExchange({
-          request: {
-            method,
-            scheme: target.scheme,
-            host: formatHost(target.hostname, target.port, defaultPort),
-            path,
-            headers: toHeaderPairs(clientReq.headers),
-            body: requestBody.toBody(clientReq.headers["content-encoding"]),
-          },
-          response: {
-            status: upstreamRes.statusCode ?? 0,
-            statusText: upstreamRes.statusMessage ?? "",
-            headers: toHeaderPairs(upstreamRes.headers),
-            body: responseBody.toBody(upstreamRes.headers["content-encoding"]),
-          },
+        const responseBody = new BodyCollector();
+        upstreamRes.on("data", (chunk: Buffer) => responseBody.push(chunk));
+        upstreamRes.on("end", () => {
+          recordExchange({
+            request: {
+              method,
+              scheme: target.scheme,
+              host,
+              path,
+              headers: toHeaderPairs(clientReq.headers),
+              body: requestBody.toBody(clientReq.headers["content-encoding"]),
+            },
+            response: {
+              status: upstreamRes.statusCode ?? 0,
+              statusText: upstreamRes.statusMessage ?? "",
+              headers: toHeaderPairs(upstreamRes.headers),
+              body: responseBody.toBody(
+                upstreamRes.headers["content-encoding"],
+              ),
+            },
+          });
         });
-      });
-    },
-  );
-
-  upstreamReq.on("error", (err) => {
-    console.error(
-      `[proxy] upstream error for ${target.scheme}://${target.hostname}:${target.port}${path}: ${err.message}`,
+      },
     );
-    if (!clientRes.headersSent) {
-      clientRes.writeHead(502, { "Content-Type": "text/plain" });
-    }
-    clientRes.end("Bad Gateway");
-  });
 
-  clientReq.pipe(upstreamReq);
+    upstreamReq.on("error", (err) => {
+      console.error(
+        `[proxy] upstream error for ${target.scheme}://${target.hostname}:${target.port}${path}: ${err.message}`,
+      );
+      if (!clientRes.headersSent) {
+        clientRes.writeHead(502, { "Content-Type": "text/plain" });
+      }
+      clientRes.end("Bad Gateway");
+    });
+
+    if (replayBody) {
+      if (replayBody.length > 0) upstreamReq.write(replayBody);
+      upstreamReq.end();
+    } else {
+      clientReq.pipe(upstreamReq);
+    }
+  }
+
+  if (!isInterceptEnabled()) {
+    sendUpstream();
+    return;
+  }
+
+  clientReq.on("end", () => {
+    void awaitInterceptDecision({
+      method,
+      scheme: target.scheme,
+      host,
+      path,
+      headers: toHeaderPairs(clientReq.headers),
+      body: requestBody.toBody(clientReq.headers["content-encoding"]),
+    }).then((decision) => {
+      // The browser may have already given up while this sat held.
+      if (clientRes.writableEnded || clientRes.destroyed) return;
+      if (decision === "drop") {
+        clientRes
+          .writeHead(502, { "Content-Type": "text/plain" })
+          .end("Dropped by intercept.");
+        return;
+      }
+      sendUpstream(requestBody.toBuffer());
+    });
+  });
 }
 
 // Handles a plain-HTTP request whose request-target is an absolute-URI,

@@ -1,4 +1,4 @@
-import type { CapturedExchange } from "./types";
+import type { CapturedExchange, CapturedRequest } from "./types";
 
 export interface CACertificateInfo {
   subject: string;
@@ -7,11 +7,24 @@ export interface CACertificateInfo {
   sha256Fingerprint: string;
 }
 
+export interface PendingInterceptedRequest extends CapturedRequest {
+  id: string;
+}
+
 export interface ServerBridge {
   getExchanges: () => CapturedExchange[];
   onExchange: (listener: (exchange: CapturedExchange) => void) => () => void;
   getCACertificateInfo: () => CACertificateInfo;
   exportCACertificate: (destinationPath: string) => string;
+  isInterceptEnabled: () => boolean;
+  setInterceptEnabled: (enabled: boolean) => void;
+  getPendingRequests: () => PendingInterceptedRequest[];
+  onPendingRequest: (
+    listener: (entry: PendingInterceptedRequest) => void,
+  ) => () => void;
+  onPendingRequestResolved: (listener: (id: string) => void) => () => void;
+  forwardPendingRequest: (id: string) => void;
+  dropPendingRequest: (id: string) => void;
 }
 
 const BRIDGE_METHODS: (keyof ServerBridge)[] = [
@@ -19,6 +32,13 @@ const BRIDGE_METHODS: (keyof ServerBridge)[] = [
   "onExchange",
   "getCACertificateInfo",
   "exportCACertificate",
+  "isInterceptEnabled",
+  "setInterceptEnabled",
+  "getPendingRequests",
+  "onPendingRequest",
+  "onPendingRequestResolved",
+  "forwardPendingRequest",
+  "dropPendingRequest",
 ];
 
 // The proxy runs in NW.js's node-main context (src/server/desktop.ts,

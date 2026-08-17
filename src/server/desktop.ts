@@ -5,6 +5,15 @@
 // context via `process.mainModule.exports`.
 import { exportCACertificate, getCACertificateInfo } from "./ca.ts";
 import { getExchanges, onExchange } from "./capture.ts";
+import {
+  dropPendingRequest,
+  forwardPendingRequest,
+  getPendingRequests,
+  isInterceptEnabled,
+  onPendingRequest,
+  onPendingRequestResolved,
+  setInterceptEnabled,
+} from "./intercept.ts";
 import { createProxyServer } from "./proxy.ts";
 
 const HOST = "127.0.0.1";
@@ -20,4 +29,16 @@ server.listen(PORT, HOST, () => {
   console.log(`[proxy] listening on http://${HOST}:${PORT}`);
 });
 
-export { exportCACertificate, getCACertificateInfo, getExchanges, onExchange };
+export {
+  dropPendingRequest,
+  exportCACertificate,
+  forwardPendingRequest,
+  getCACertificateInfo,
+  getExchanges,
+  getPendingRequests,
+  isInterceptEnabled,
+  onExchange,
+  onPendingRequest,
+  onPendingRequestResolved,
+  setInterceptEnabled,
+};

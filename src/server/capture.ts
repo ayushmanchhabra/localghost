@@ -57,12 +57,20 @@ export class BodyCollector {
     this.#bytes += chunk.length;
   }
 
+  // Raw bytes as received (capped, like everything else this
+  // collects). Used to replay a request body when interception
+  // forwards it after holding it — a held body over the cap is
+  // truncated the same way it would be for display.
+  toBuffer(): Buffer {
+    return Buffer.concat(this.#chunks);
+  }
+
   // `contentEncoding` decompresses the captured copy for display; the
   // bytes actually piped to the client are untouched, so real browsing
   // is unaffected either way.
   toBody(contentEncoding?: string | string[]): string | undefined {
     if (this.#chunks.length === 0) return undefined;
-    const raw = Buffer.concat(this.#chunks);
+    const raw = this.toBuffer();
     // A cut-off compressed stream won't decompress cleanly — show the
     // raw bytes rather than let decoding throw on a partial body.
     const body = this.#truncated
