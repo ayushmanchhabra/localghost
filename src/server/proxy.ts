@@ -94,13 +94,13 @@ function proxyRequest(
             host: formatHost(target.hostname, target.port, defaultPort),
             path,
             headers: toHeaderPairs(clientReq.headers),
-            body: requestBody.toBody(),
+            body: requestBody.toBody(clientReq.headers["content-encoding"]),
           },
           response: {
             status: upstreamRes.statusCode ?? 0,
             statusText: upstreamRes.statusMessage ?? "",
             headers: toHeaderPairs(upstreamRes.headers),
-            body: responseBody.toBody(),
+            body: responseBody.toBody(upstreamRes.headers["content-encoding"]),
           },
         });
       });
