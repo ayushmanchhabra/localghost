@@ -13,6 +13,7 @@ AI security companion.
 ### Features
 
 - Identify potential Indicators of Compromise such as weak JWT, 403 bypass, etc. This should happen automatically, every time a request/response is captured.
+- Left panel to store scope and findings info
 
 ### Bugs
 
