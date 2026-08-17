@@ -14,6 +14,11 @@ AI security companion.
 
 - Identify potential Indicators of Compromise such as weak JWT, 403 bypass, etc. This should happen automatically, every time a request/response is captured.
 
+### Bugs
+
+- Clear button does not work
+
 ### Chores
 
 - Convert all Node manifest `scripts`'s CLI commands to Node.js scripts.
+- Increase test coverage
