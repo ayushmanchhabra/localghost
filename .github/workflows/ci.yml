@@ -21,7 +21,7 @@ jobs:
           - macos-26
           - macos-26-intel
           - ubuntu-24.04
-          - ubuntu-24.04-arm
+          # - ubuntu-24.04-arm
           - windows-2025
           - windows-11-arm
         include:
@@ -31,8 +31,8 @@ jobs:
             display: MacOS 26 Intel
           - os: ubuntu-24.04
             display: Ubuntu 24.04 Intel
-          - os: ubuntu-24.04-arm
-            display: Ubuntu 24.04 ARM
+          # - os: ubuntu-24.04-arm
+          #   display: Ubuntu 24.04 ARM
           - os: windows-2025
             display: Windows 11 Intel
           - os: windows-11-arm

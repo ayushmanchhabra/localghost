@@ -4,7 +4,7 @@ node_modules
 # application
 cache
 out
-desktop
+src/desktop/main.js
+src/desktop/server.js
+src/desktop/styles.css
 src/website/main.js
-src/website/main.js.map
-src/website/styles.output.css

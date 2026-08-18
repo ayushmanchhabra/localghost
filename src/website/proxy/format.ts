@@ -1,7 +1,6 @@
-import type { CapturedExchange, HttpMethod } from "./types";
+import type { CapturedExchange, CapturedRequest, HttpMethod } from "./types";
 
-export function rawRequest(entry: CapturedExchange): string {
-  const { request } = entry;
+export function rawRequest(request: CapturedRequest): string {
   const lines = [
     `${request.method} ${request.path} HTTP/1.1`,
     ...request.headers.map(([name, value]) => `${name}: ${value}`),
@@ -24,6 +23,7 @@ export function rawResponse(entry: CapturedExchange): string {
 
 const METHOD_COLOR: Record<HttpMethod, string> = {
   GET: "text-sky-400 border-sky-400/30 bg-sky-400/10",
+  HEAD: "text-neutral-400 border-neutral-400/30 bg-neutral-400/10",
   POST: "text-emerald-400 border-emerald-400/30 bg-emerald-400/10",
   PUT: "text-amber-400 border-amber-400/30 bg-amber-400/10",
   PATCH: "text-violet-400 border-violet-400/30 bg-violet-400/10",

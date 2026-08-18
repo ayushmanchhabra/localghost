@@ -1,5 +1,5 @@
 export type HttpMethod =
-  "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
+  "GET" | "HEAD" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
 
 export interface CapturedRequest {
   method: HttpMethod;
